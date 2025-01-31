@@ -52,4 +52,12 @@ public class EmployeeService {
 
         return emp.get().employeeSalary();
     }
+
+    public List<String> getTopTenHighestEarningEmployeeNames() {
+        return getAllEmployees().stream()
+                .sorted((e1, e2) -> Double.compare(e2.employeeSalary(), e1.employeeSalary()))
+                .limit(10)
+                .map(EmployeeEntity::employeeName)
+                .toList();
+    }
 }

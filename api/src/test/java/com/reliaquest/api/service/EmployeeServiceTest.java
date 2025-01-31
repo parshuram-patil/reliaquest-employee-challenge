@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -122,5 +123,30 @@ class EmployeeServiceTest {
 
         assertEquals("No Employees Found", error.getMessage());
         verify(dataService).getAllEmployees();
+    }
+
+    @Test
+    void shouldGetTopTenHighestEarningEmployeeNames() {
+        List<EmployeeEntity> empList = new ArrayList<>(EmployeeTestUtil.getMockedEmployees().values().stream().toList());
+        empList.addAll(EmployeeTestUtil.getMockedEmployees().values().stream().toList());
+        empList.addAll(EmployeeTestUtil.getMockedEmployees().values().stream().toList());
+        empList.addAll(EmployeeTestUtil.getMockedEmployees().values().stream().toList());
+        when(dataService.getAllEmployees()).thenReturn(empList);
+
+        List<String> actual = service.getTopTenHighestEarningEmployeeNames();
+        List<String> expected = List.of("Jane Smith", "Jane Smith", "Jane Smith", "Jane Smith", "John Doe", "John Doe", "John Doe", "John Doe", "Bob Johnson", "Bob Johnson");
+        assertEquals(10, actual.size());
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldGetTopTenHighestEarningEmployeeNamesForLessThan10Employees() {
+        List<EmployeeEntity> empList = EmployeeTestUtil.getMockedEmployees().values().stream().toList();
+        when(dataService.getAllEmployees()).thenReturn(empList);
+
+        List<String> actual = service.getTopTenHighestEarningEmployeeNames();
+        List<String> expected = List.of("Jane Smith", "John Doe", "Bob Johnson");
+        assertEquals(3, actual.size());
+        assertEquals(expected, actual);
     }
 }

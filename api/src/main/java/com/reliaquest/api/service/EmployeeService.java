@@ -1,0 +1,35 @@
+package com.reliaquest.api.service;
+
+import com.reliaquest.api.dto.CreateEmployeeRequestDto;
+import com.reliaquest.api.dto.DeleteEmployeeRequestDto;
+import com.reliaquest.api.dto.EmployeeEntity;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class EmployeeService {
+
+    private final EmployeeDataService dataService;
+
+    public List<EmployeeEntity> getAllEmployees() {
+        return dataService.getAllEmployees();
+    }
+
+    public EmployeeEntity getEmployee(UUID id) {
+        return dataService.getEmployee(id);
+    }
+
+    public EmployeeEntity createEmployee(CreateEmployeeRequestDto employeeRequest) {
+        return dataService.createEmployee(employeeRequest);
+    }
+
+    public Boolean deleteEmployee(String name) {
+        return dataService.deleteEmployee(new DeleteEmployeeRequestDto(name));
+    }
+}

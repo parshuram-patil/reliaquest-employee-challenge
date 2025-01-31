@@ -79,4 +79,26 @@ class EmployeeServiceTest {
 
         assertFalse(actual);
     }
+
+    @Test
+    void shouldSearchEmployeeWithName() {
+        List<EmployeeEntity> empList = EmployeeTestUtil.getMockedEmployees().values().stream().toList();
+        when(dataService.getAllEmployees()).thenReturn(empList);
+
+        List<EmployeeEntity> actual = service.getEmployeesByNameSearch("Jane Smith");
+
+        assertEquals(1, actual.size());
+        assertEquals("Jane Smith", actual.get(0).employeeName());
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoEmployeeMatchesName() {
+        List<EmployeeEntity> empList = EmployeeTestUtil.getMockedEmployees().values().stream().toList();
+        when(dataService.getAllEmployees()).thenReturn(empList);
+
+        List<EmployeeEntity> actual = service.getEmployeesByNameSearch("XyZ");
+
+        assertEquals(0, actual.size());
+        verify(dataService).getAllEmployees();
+    }
 }

@@ -32,4 +32,10 @@ public class EmployeeService {
     public Boolean deleteEmployee(String name) {
         return dataService.deleteEmployee(new DeleteEmployeeRequestDto(name));
     }
+
+    public List<EmployeeEntity> getEmployeesByNameSearch(String searchString) {
+        return getAllEmployees().stream()
+                .filter(emp -> emp.employeeName().equalsIgnoreCase(searchString))
+                .toList();
+    }
 }

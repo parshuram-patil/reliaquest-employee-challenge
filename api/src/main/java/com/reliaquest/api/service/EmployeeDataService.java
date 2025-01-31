@@ -1,4 +1,4 @@
-package com.reliaquest.api;
+package com.reliaquest.api.service;
 
 import com.reliaquest.api.dto.CreateEmployeeRequestDto;
 import com.reliaquest.api.dto.DeleteEmployeeRequestDto;
@@ -7,6 +7,7 @@ import com.reliaquest.api.dto.EmployeeResponseDto;
 import com.reliaquest.api.exception.EmployeeChallengeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -24,12 +25,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class EmployeeDataService {
+
+    @Value("${employee.data.api.url}")
+    private String apiUrl;
+
     private final RestTemplate restTemplate;
-    private final String API_URL = "http://localhost:8112/api/v1/employee";
 
     public List<EmployeeEntity> getAllEmployees() {
         ParameterizedTypeReference<EmployeeResponseDto<List<EmployeeEntity>>> responseType = new ParameterizedTypeReference<>() {};
-        ResponseEntity<EmployeeResponseDto<List<EmployeeEntity>>> response = restTemplate.exchange(API_URL, HttpMethod.GET, null, responseType);
+        ResponseEntity<EmployeeResponseDto<List<EmployeeEntity>>> response = restTemplate.exchange(apiUrl, HttpMethod.GET, null, responseType);
 
         return Objects.requireNonNull(response.getBody()).data();
     }
@@ -37,7 +41,7 @@ public class EmployeeDataService {
     public EmployeeEntity getEmployee(UUID id) {
         ParameterizedTypeReference<EmployeeResponseDto<EmployeeEntity>> responseType = new ParameterizedTypeReference<>() {};
         try {
-            ResponseEntity<EmployeeResponseDto<EmployeeEntity>> response = restTemplate.exchange((API_URL + "/" + id), HttpMethod.GET, null, responseType);
+            ResponseEntity<EmployeeResponseDto<EmployeeEntity>> response = restTemplate.exchange((apiUrl + "/" + id), HttpMethod.GET, null, responseType);
             EmployeeResponseDto<EmployeeEntity> responseDto = Objects.requireNonNull(response.getBody());
 
             return responseDto.data();
@@ -57,7 +61,7 @@ public class EmployeeDataService {
     public EmployeeEntity createEmployee(CreateEmployeeRequestDto employeeRequest) {
         ParameterizedTypeReference<EmployeeResponseDto<EmployeeEntity>> responseType = new ParameterizedTypeReference<>() {};
         HttpEntity<CreateEmployeeRequestDto> entity = new HttpEntity<>(employeeRequest);
-        ResponseEntity<EmployeeResponseDto<EmployeeEntity>> response = restTemplate.exchange(API_URL, HttpMethod.POST, entity, responseType);
+        ResponseEntity<EmployeeResponseDto<EmployeeEntity>> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, responseType);
         EmployeeResponseDto<EmployeeEntity> responseDto = Objects.requireNonNull(response.getBody());
 
         return responseDto.data();
@@ -66,7 +70,7 @@ public class EmployeeDataService {
     public Boolean deleteEmployee(DeleteEmployeeRequestDto employeeRequest) {
         ParameterizedTypeReference<EmployeeResponseDto<Boolean>> responseType = new ParameterizedTypeReference<>() {};
         HttpEntity<DeleteEmployeeRequestDto> entity = new HttpEntity<>(employeeRequest);
-        ResponseEntity<EmployeeResponseDto<Boolean>> response = restTemplate.exchange(API_URL, HttpMethod.DELETE, entity, responseType);
+        ResponseEntity<EmployeeResponseDto<Boolean>> response = restTemplate.exchange(apiUrl, HttpMethod.DELETE, entity, responseType);
         EmployeeResponseDto<Boolean> responseDto = Objects.requireNonNull(response.getBody());
         Boolean result = responseDto.data();
         if(!result) {

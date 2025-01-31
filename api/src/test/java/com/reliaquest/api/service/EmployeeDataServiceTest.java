@@ -1,10 +1,11 @@
-package com.reliaquest.api;
+package com.reliaquest.api.service;
 
 import com.reliaquest.api.dto.CreateEmployeeRequestDto;
 import com.reliaquest.api.dto.DeleteEmployeeRequestDto;
 import com.reliaquest.api.dto.EmployeeEntity;
 import com.reliaquest.api.dto.EmployeeResponseDto;
 import com.reliaquest.api.exception.EmployeeChallengeException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -36,6 +38,13 @@ class EmployeeDataServiceTest {
     @Mock
     RestTemplate restTemplate;
 
+    @BeforeEach
+    void setUp() throws NoSuchFieldException, IllegalAccessException {
+        Field field = EmployeeDataService.class.getDeclaredField("apiUrl");
+        field.setAccessible(true);
+        field.set(service, "http://testhost:1234/api/v1/employee");
+    }
+
     @Test
     void shouldCreate() {
         assertNotNull(service);
@@ -51,7 +60,7 @@ class EmployeeDataServiceTest {
 
         assertEquals(3, allEmployees.size());
         ParameterizedTypeReference<EmployeeResponseDto<List<EmployeeEntity>>> responseType = new ParameterizedTypeReference<>() {};
-        verify(restTemplate).exchange("http://localhost:8112/api/v1/employee", HttpMethod.GET, null, responseType);
+        verify(restTemplate).exchange("http://testhost:1234/api/v1/employee", HttpMethod.GET, null, responseType);
     }
 
     @Test
@@ -76,7 +85,7 @@ class EmployeeDataServiceTest {
 
         assertEquals(id, employee.id());
         ParameterizedTypeReference<EmployeeResponseDto<EmployeeEntity>> responseType = new ParameterizedTypeReference<>() {};
-        verify(restTemplate).exchange("http://localhost:8112/api/v1/employee/" + id, HttpMethod.GET, null, responseType);
+        verify(restTemplate).exchange("http://testhost:1234/api/v1/employee/" + id, HttpMethod.GET, null, responseType);
     }
 
     @Test
@@ -113,7 +122,7 @@ class EmployeeDataServiceTest {
         assertEquals(expected, actual);
         ParameterizedTypeReference<EmployeeResponseDto<EmployeeEntity>> responseType = new ParameterizedTypeReference<>() {};
         HttpEntity<CreateEmployeeRequestDto> entity = new HttpEntity<>(requestDto);
-        verify(restTemplate).exchange("http://localhost:8112/api/v1/employee", HttpMethod.POST, entity, responseType);
+        verify(restTemplate).exchange("http://testhost:1234/api/v1/employee", HttpMethod.POST, entity, responseType);
     }
 
     @Test
@@ -127,7 +136,7 @@ class EmployeeDataServiceTest {
         assertTrue(actual);
         ParameterizedTypeReference<EmployeeResponseDto<Boolean>> responseType = new ParameterizedTypeReference<>() {};
         HttpEntity<DeleteEmployeeRequestDto> entity = new HttpEntity<>(requestDto);
-        verify(restTemplate).exchange("http://localhost:8112/api/v1/employee", HttpMethod.DELETE, entity, responseType);
+        verify(restTemplate).exchange("http://testhost:1234/api/v1/employee", HttpMethod.DELETE, entity, responseType);
     }
 
     @Test
@@ -141,7 +150,7 @@ class EmployeeDataServiceTest {
         assertEquals("Employee with name Xyz 123 not found", error.getMessage());
         ParameterizedTypeReference<EmployeeResponseDto<Boolean>> responseType = new ParameterizedTypeReference<>() {};
         HttpEntity<DeleteEmployeeRequestDto> entity = new HttpEntity<>(requestDto);
-        verify(restTemplate).exchange("http://localhost:8112/api/v1/employee", HttpMethod.DELETE, entity, responseType);
+        verify(restTemplate).exchange("http://testhost:1234/api/v1/employee", HttpMethod.DELETE, entity, responseType);
     }
 
     private Map<UUID, EmployeeEntity> getMockedEmployees() {

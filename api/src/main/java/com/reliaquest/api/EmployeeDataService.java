@@ -1,6 +1,7 @@
 package com.reliaquest.api;
 
 import com.reliaquest.api.dto.CreateEmployeeRequestDto;
+import com.reliaquest.api.dto.DeleteEmployeeRequestDto;
 import com.reliaquest.api.dto.EmployeeEntity;
 import com.reliaquest.api.dto.EmployeeResponseDto;
 import com.reliaquest.api.exception.EmployeeChallengeException;
@@ -60,5 +61,20 @@ public class EmployeeDataService {
         EmployeeResponseDto<EmployeeEntity> responseDto = Objects.requireNonNull(response.getBody());
 
         return responseDto.data();
+    }
+
+    public Boolean deleteEmployee(DeleteEmployeeRequestDto employeeRequest) {
+        ParameterizedTypeReference<EmployeeResponseDto<Boolean>> responseType = new ParameterizedTypeReference<>() {};
+        HttpEntity<DeleteEmployeeRequestDto> entity = new HttpEntity<>(employeeRequest);
+        ResponseEntity<EmployeeResponseDto<Boolean>> response = restTemplate.exchange(API_URL, HttpMethod.DELETE, entity, responseType);
+        EmployeeResponseDto<Boolean> responseDto = Objects.requireNonNull(response.getBody());
+        Boolean result = responseDto.data();
+        if(!result) {
+            String errMsg = String.format("Employee with name %s not found", employeeRequest.name());
+            log.error(errMsg);
+            throw new EmployeeChallengeException(errMsg, HttpStatus.NOT_FOUND);
+        }
+
+        return true;
     }
 }

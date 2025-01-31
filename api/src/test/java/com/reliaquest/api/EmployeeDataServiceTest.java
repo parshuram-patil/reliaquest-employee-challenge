@@ -1,6 +1,7 @@
 package com.reliaquest.api;
 
 import com.reliaquest.api.dto.CreateEmployeeRequestDto;
+import com.reliaquest.api.dto.DeleteEmployeeRequestDto;
 import com.reliaquest.api.dto.EmployeeEntity;
 import com.reliaquest.api.dto.EmployeeResponseDto;
 import com.reliaquest.api.exception.EmployeeChallengeException;
@@ -107,12 +108,40 @@ class EmployeeDataServiceTest {
         EmployeeResponseDto<EmployeeEntity> responseDto = new EmployeeResponseDto<>(expected, "ACK", null);
         when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(ParameterizedTypeReference.class))).thenReturn(new ResponseEntity<>(responseDto, HttpStatus.OK));
 
-        EmployeeEntity actual  = service.createEmployee(requestDto);
+        EmployeeEntity actual = service.createEmployee(requestDto);
 
         assertEquals(expected, actual);
         ParameterizedTypeReference<EmployeeResponseDto<EmployeeEntity>> responseType = new ParameterizedTypeReference<>() {};
         HttpEntity<CreateEmployeeRequestDto> entity = new HttpEntity<>(requestDto);
         verify(restTemplate).exchange("http://localhost:8112/api/v1/employee", HttpMethod.POST, entity, responseType);
+    }
+
+    @Test
+    void shouldDeleteEmployee() {
+        DeleteEmployeeRequestDto requestDto = new DeleteEmployeeRequestDto("Bob Johnson");
+        EmployeeResponseDto<Boolean> responseDto = new EmployeeResponseDto<>(true, "ACK", null);
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(ParameterizedTypeReference.class))).thenReturn(new ResponseEntity<>(responseDto, HttpStatus.OK));
+
+        Boolean actual = service.deleteEmployee(requestDto);
+
+        assertTrue(actual);
+        ParameterizedTypeReference<EmployeeResponseDto<Boolean>> responseType = new ParameterizedTypeReference<>() {};
+        HttpEntity<DeleteEmployeeRequestDto> entity = new HttpEntity<>(requestDto);
+        verify(restTemplate).exchange("http://localhost:8112/api/v1/employee", HttpMethod.DELETE, entity, responseType);
+    }
+
+    @Test
+    void shouldHandleDeleteOfNonExistingEmployee() {
+        DeleteEmployeeRequestDto requestDto = new DeleteEmployeeRequestDto("Xyz 123");
+        EmployeeResponseDto<Boolean> responseDto = new EmployeeResponseDto<>(false, "ACK", null);
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(ParameterizedTypeReference.class))).thenReturn(new ResponseEntity<>(responseDto, HttpStatus.OK));
+
+        EmployeeChallengeException error = assertThrows(EmployeeChallengeException.class, () -> service.deleteEmployee(new DeleteEmployeeRequestDto("Xyz 123")));
+
+        assertEquals("Employee with name Xyz 123 not found", error.getMessage());
+        ParameterizedTypeReference<EmployeeResponseDto<Boolean>> responseType = new ParameterizedTypeReference<>() {};
+        HttpEntity<DeleteEmployeeRequestDto> entity = new HttpEntity<>(requestDto);
+        verify(restTemplate).exchange("http://localhost:8112/api/v1/employee", HttpMethod.DELETE, entity, responseType);
     }
 
     private Map<UUID, EmployeeEntity> getMockedEmployees() {

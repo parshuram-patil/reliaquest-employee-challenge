@@ -5,6 +5,7 @@ import com.reliaquest.api.dto.DeleteEmployeeRequestDto;
 import com.reliaquest.api.dto.EmployeeEntity;
 import com.reliaquest.api.dto.EmployeeResponseDto;
 import com.reliaquest.api.exception.EmployeeChallengeException;
+import com.reliaquest.api.utils.EmployeeTestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +53,7 @@ class EmployeeDataServiceTest {
 
     @Test
     void shouldGetAllEmployees() {
-        List<EmployeeEntity> empList = getMockedEmployees().values().stream().toList();
+        List<EmployeeEntity> empList = EmployeeTestUtil.getMockedEmployees().values().stream().toList();
         EmployeeResponseDto<List<EmployeeEntity>> responseDto = new EmployeeResponseDto<>(empList, "ACK", null);
         when(restTemplate.exchange(anyString(), any(HttpMethod.class), eq(null), any(ParameterizedTypeReference.class))).thenReturn(new ResponseEntity<>(responseDto, HttpStatus.OK));
 
@@ -75,7 +76,7 @@ class EmployeeDataServiceTest {
 
     @Test
     void shouldGetEmployee() {
-        Map.Entry<UUID, EmployeeEntity> empEntry = getMockedEmployees().entrySet().iterator().next();
+        Map.Entry<UUID, EmployeeEntity> empEntry = EmployeeTestUtil.getMockedEmployees().entrySet().iterator().next();
         EmployeeEntity emp = empEntry.getValue();
         UUID id = empEntry.getKey();
         EmployeeResponseDto<EmployeeEntity> responseDto = new EmployeeResponseDto<>(emp, "ACK", null);

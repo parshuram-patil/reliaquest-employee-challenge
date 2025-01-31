@@ -3,11 +3,14 @@ package com.reliaquest.api.service;
 import com.reliaquest.api.dto.CreateEmployeeRequestDto;
 import com.reliaquest.api.dto.DeleteEmployeeRequestDto;
 import com.reliaquest.api.dto.EmployeeEntity;
+import com.reliaquest.api.exception.EmployeeChallengeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -37,5 +40,16 @@ public class EmployeeService {
         return getAllEmployees().stream()
                 .filter(emp -> emp.employeeName().equalsIgnoreCase(searchString))
                 .toList();
+    }
+
+    public Integer getHighestSalaryOfEmployees() {
+        Optional<EmployeeEntity> emp = getAllEmployees().stream()
+                .max(Comparator.comparingDouble(EmployeeEntity::employeeSalary));
+
+        if(emp.isEmpty()) {
+            throw new EmployeeChallengeException("No Employees Found");
+        }
+
+        return emp.get().employeeSalary();
     }
 }

@@ -3,6 +3,7 @@ package com.reliaquest.api.service;
 import com.reliaquest.api.dto.CreateEmployeeRequestDto;
 import com.reliaquest.api.dto.DeleteEmployeeRequestDto;
 import com.reliaquest.api.dto.EmployeeEntity;
+import com.reliaquest.api.exception.EmployeeChallengeException;
 import com.reliaquest.api.utils.EmployeeTestUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -99,6 +100,27 @@ class EmployeeServiceTest {
         List<EmployeeEntity> actual = service.getEmployeesByNameSearch("XyZ");
 
         assertEquals(0, actual.size());
+        verify(dataService).getAllEmployees();
+    }
+
+    @Test
+    void shouldGetHighestSalaryOfEmployees() {
+        List<EmployeeEntity> empList = EmployeeTestUtil.getMockedEmployees().values().stream().toList();
+        when(dataService.getAllEmployees()).thenReturn(empList);
+
+        Integer highestSalaryOfEmployees = service.getHighestSalaryOfEmployees();
+
+        assertEquals(60000, highestSalaryOfEmployees);
+        verify(dataService).getAllEmployees();
+    }
+
+    @Test
+    void shouldThrowExceptionOnGetHighestSalaryOfEmployees() {
+        when(dataService.getAllEmployees()).thenReturn(List.of());
+
+        EmployeeChallengeException error = assertThrows(EmployeeChallengeException.class, () -> service.getHighestSalaryOfEmployees());
+
+        assertEquals("No Employees Found", error.getMessage());
         verify(dataService).getAllEmployees();
     }
 }

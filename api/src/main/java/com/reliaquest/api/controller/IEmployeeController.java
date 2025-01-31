@@ -1,12 +1,10 @@
 package com.reliaquest.api.controller;
 
-import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Please <b>do not</b> modify this interface. If you believe there's a bug or the API contract does not align with our
@@ -27,7 +25,7 @@ public interface IEmployeeController<Entity, Input> {
     ResponseEntity<List<Entity>> getEmployeesByNameSearch(@PathVariable String searchString);
 
     @GetMapping("/{id}")
-    ResponseEntity<Entity> getEmployeeById(@PathVariable String id);
+    ResponseEntity<Entity> getEmployeeById(@PathVariable UUID id);
 
     @GetMapping("/highestSalary")
     ResponseEntity<Integer> getHighestSalaryOfEmployees();
@@ -38,6 +36,6 @@ public interface IEmployeeController<Entity, Input> {
     @PostMapping()
     ResponseEntity<Entity> createEmployee(@RequestBody Input employeeInput);
 
-    @DeleteMapping("/{id}")
-    ResponseEntity<String> deleteEmployeeById(@PathVariable String id);
+    @DeleteMapping("/{name}")
+    ResponseEntity<Boolean> deleteEmployeeByName(@PathVariable String name);
 }

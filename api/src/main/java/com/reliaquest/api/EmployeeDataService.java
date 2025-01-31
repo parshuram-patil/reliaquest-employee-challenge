@@ -1,11 +1,13 @@
 package com.reliaquest.api;
 
+import com.reliaquest.api.dto.CreateEmployeeRequestDto;
 import com.reliaquest.api.dto.EmployeeEntity;
 import com.reliaquest.api.dto.EmployeeResponseDto;
 import com.reliaquest.api.exception.EmployeeChallengeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +38,7 @@ public class EmployeeDataService {
         try {
             ResponseEntity<EmployeeResponseDto<EmployeeEntity>> response = restTemplate.exchange((API_URL + "/" + id), HttpMethod.GET, null, responseType);
             EmployeeResponseDto<EmployeeEntity> responseDto = Objects.requireNonNull(response.getBody());
+
             return responseDto.data();
         } catch (HttpClientErrorException ex) {
             if(ex.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
@@ -48,5 +51,14 @@ public class EmployeeDataService {
                 throw new EmployeeChallengeException(errMsg);
             }
         }
+    }
+
+    public EmployeeEntity createEmployee(CreateEmployeeRequestDto employeeRequest) {
+        ParameterizedTypeReference<EmployeeResponseDto<EmployeeEntity>> responseType = new ParameterizedTypeReference<>() {};
+        HttpEntity<CreateEmployeeRequestDto> entity = new HttpEntity<>(employeeRequest);
+        ResponseEntity<EmployeeResponseDto<EmployeeEntity>> response = restTemplate.exchange(API_URL, HttpMethod.POST, entity, responseType);
+        EmployeeResponseDto<EmployeeEntity> responseDto = Objects.requireNonNull(response.getBody());
+
+        return responseDto.data();
     }
 }

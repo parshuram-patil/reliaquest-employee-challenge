@@ -1,5 +1,6 @@
 package com.reliaquest.api;
 
+import com.reliaquest.api.dto.CreateEmployeeRequestDto;
 import com.reliaquest.api.dto.EmployeeEntity;
 import com.reliaquest.api.dto.EmployeeResponseDto;
 import com.reliaquest.api.exception.EmployeeChallengeException;
@@ -9,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -96,6 +98,21 @@ class EmployeeDataServiceTest {
 
         EmployeeChallengeException error = assertThrows(EmployeeChallengeException.class, () -> service.getEmployee(empId));
         assertEquals("Error fetching employee with id " + empId, error.getMessage());
+    }
+
+    @Test
+    void shouldCrateEmployee() {
+        EmployeeEntity expected = new EmployeeEntity(UUID.randomUUID(), "John Doe", 50000, 30, "Engineer", "john@tets.com");
+        CreateEmployeeRequestDto requestDto = new CreateEmployeeRequestDto("John Doe", 50000, 30, "Engineer");
+        EmployeeResponseDto<EmployeeEntity> responseDto = new EmployeeResponseDto<>(expected, "ACK", null);
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(ParameterizedTypeReference.class))).thenReturn(new ResponseEntity<>(responseDto, HttpStatus.OK));
+
+        EmployeeEntity actual  = service.createEmployee(requestDto);
+
+        assertEquals(expected, actual);
+        ParameterizedTypeReference<EmployeeResponseDto<EmployeeEntity>> responseType = new ParameterizedTypeReference<>() {};
+        HttpEntity<CreateEmployeeRequestDto> entity = new HttpEntity<>(requestDto);
+        verify(restTemplate).exchange("http://localhost:8112/api/v1/employee", HttpMethod.POST, entity, responseType);
     }
 
     private Map<UUID, EmployeeEntity> getMockedEmployees() {

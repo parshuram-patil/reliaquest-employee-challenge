@@ -1,6 +1,6 @@
 package com.reliaquest.api.dto;
 
-public record EmployeeRequestDto (
+public record CreateEmployeeRequestDto(
     String name,
     Integer salary,
     Integer age,

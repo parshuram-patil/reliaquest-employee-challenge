@@ -20,42 +20,42 @@ public class EmployeeController implements IEmployeeController<EmployeeEntity, C
     @Override
     @GetMapping
     public ResponseEntity<List<EmployeeEntity>> getAllEmployees() {
-        return null;
+        return ResponseEntity.ok().body(service.getAllEmployees());
     }
 
     @Override
     @GetMapping("/search/{searchString}")
     public ResponseEntity<List<EmployeeEntity>> getEmployeesByNameSearch(String searchString) {
-        return null;
+        return ResponseEntity.ok().body(service.getEmployeesByNameSearch(searchString));
     }
 
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeEntity> getEmployeeById(UUID id) {
-        return null;
+        return ResponseEntity.ok().body(service.getEmployee(id));
     }
 
     @Override
     @GetMapping("/highestSalary")
     public ResponseEntity<Integer> getHighestSalaryOfEmployees() {
-        return null;
+        return ResponseEntity.ok().body(service.getHighestSalaryOfEmployees());
     }
 
     @Override
     @GetMapping("/topTenHighestEarningEmployeeNames")
     public ResponseEntity<List<String>> getTopTenHighestEarningEmployeeNames() {
-        return null;
+        return ResponseEntity.ok().body(service.getTopTenHighestEarningEmployeeNames());
     }
 
     @Override
     @PostMapping
     public ResponseEntity<EmployeeEntity> createEmployee(CreateEmployeeRequestDto employeeInput) {
-        return null;
+        return ResponseEntity.ok().body(service.createEmployee(employeeInput));
     }
 
     @Override
     @DeleteMapping("/{name}")
     public ResponseEntity<Boolean> deleteEmployeeByName(String name) {
-        return null;
+        return ResponseEntity.ok().body(service.deleteEmployee(name));
     }
 }

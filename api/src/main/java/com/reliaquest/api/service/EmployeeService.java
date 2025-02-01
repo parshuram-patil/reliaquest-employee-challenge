@@ -43,14 +43,14 @@ public class EmployeeService {
     public List<EmployeeEntity> getEmployeesByNameSearch(String searchString) {
         log.info("Searching all employees with with pattern '{}'", searchString);
         return getAllEmployees().stream()
-                .filter(emp -> emp.employeeName().equalsIgnoreCase(searchString))
+                .filter(emp -> emp.getName().equalsIgnoreCase(searchString))
                 .toList();
     }
 
     public Integer getHighestSalaryOfEmployees() {
         log.info("Finding highest salary of employees");
         Optional<EmployeeEntity> emp = getAllEmployees().stream()
-                .max(Comparator.comparingDouble(EmployeeEntity::employeeSalary));
+                .max(Comparator.comparingDouble(EmployeeEntity::getSalary));
 
         if(emp.isEmpty()) {
             String errMsg = "No Employees Found";
@@ -58,15 +58,15 @@ public class EmployeeService {
             throw new EmployeeChallengeException(errMsg);
         }
 
-        return emp.get().employeeSalary();
+        return emp.get().getSalary();
     }
 
     public List<String> getTopTenHighestEarningEmployeeNames() {
         log.info("Fetching top 10 highest earning employee names");
         return getAllEmployees().stream()
-                .sorted((e1, e2) -> Double.compare(e2.employeeSalary(), e1.employeeSalary()))
+                .sorted((e1, e2) -> Double.compare(e2.getSalary(), e1.getSalary()))
                 .limit(10)
-                .map(EmployeeEntity::employeeName)
+                .map(EmployeeEntity::getName)
                 .toList();
     }
 }

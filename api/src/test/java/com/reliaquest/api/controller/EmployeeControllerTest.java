@@ -87,8 +87,11 @@ class EmployeeControllerTest {
 
         mockMvc.perform(get("/api/v1/employee/" + id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.employee_name").value("John Doe"))
-                .andExpect(jsonPath("$.employee_salary").value(10000));
+                .andExpect(jsonPath("$.name").value("John Doe"))
+                .andExpect(jsonPath("$.salary").value(10000))
+                .andExpect(jsonPath("$.age").value(22))
+                .andExpect(jsonPath("$.title").value("Trainee"))
+                .andExpect(jsonPath("$.email").value("john@tets.com"));
 
         verify(employeeService, times(1)).getEmployee(id);
     }
@@ -121,7 +124,7 @@ class EmployeeControllerTest {
     @Test
     void testCreateEmployee() throws Exception {
         EmployeeEntity employee = new EmployeeEntity(UUID.randomUUID(), "John Doe", 10000, 22, "Trainee", "john@tets.com");
-        CreateEmployeeRequestDto requestDto = new CreateEmployeeRequestDto(employee.employeeName(), employee.employeeSalary(), employee.employeeAge(), employee.employeeTitle());
+        CreateEmployeeRequestDto requestDto = new CreateEmployeeRequestDto(employee.getName(), employee.getSalary(), employee.getAge(), employee.getTitle());
 
         when(employeeService.createEmployee(requestDto)).thenReturn(employee);
 
@@ -129,8 +132,8 @@ class EmployeeControllerTest {
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.employee_name").value("John Doe"))
-                .andExpect(jsonPath("$.employee_salary").value(10000));
+                .andExpect(jsonPath("$.name").value("John Doe"))
+                .andExpect(jsonPath("$.salary").value(10000));
 
         verify(employeeService, times(1)).createEmployee(requestDto);
     }

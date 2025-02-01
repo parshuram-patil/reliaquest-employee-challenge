@@ -44,10 +44,10 @@ class EmployeeServiceTest {
         EmployeeEntity expected = EmployeeTestUtil.getMockedEmployees().values().stream().findFirst().get();
         when(dataService.getEmployee(any())).thenReturn(expected);
 
-        EmployeeEntity actual = service.getEmployee(expected.id());
+        EmployeeEntity actual = service.getEmployee(expected.getId());
 
         assertEquals(expected, actual);
-        verify(dataService).getEmployee(expected.id());
+        verify(dataService).getEmployee(expected.getId());
     }
 
     @Test
@@ -90,7 +90,7 @@ class EmployeeServiceTest {
         List<EmployeeEntity> actual = service.getEmployeesByNameSearch("Jane Smith");
 
         assertEquals(1, actual.size());
-        assertEquals("Jane Smith", actual.get(0).employeeName());
+        assertEquals("Jane Smith", actual.get(0).getName());
     }
 
     @Test

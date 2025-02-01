@@ -84,7 +84,7 @@ class EmployeeDataServiceTest {
 
         EmployeeEntity employee = service.getEmployee(id);
 
-        assertEquals(id, employee.id());
+        assertEquals(id, employee.getId());
         ParameterizedTypeReference<EmployeeResponseDto<EmployeeEntity>> responseType = new ParameterizedTypeReference<>() {};
         verify(restTemplate).exchange("http://testhost:1234/api/v1/employee/" + id, HttpMethod.GET, null, responseType);
     }

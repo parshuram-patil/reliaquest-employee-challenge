@@ -50,11 +50,9 @@ public class EmployeeDataService {
                 String errMsg = String.format("Employee with id %s not found", id);
                 log.error(errMsg, ex);
                 throw new EmployeeChallengeException(errMsg, HttpStatus.NOT_FOUND);
-            } else {
-                String errMsg = String.format("Error fetching employee with id %s", id);
-                log.error(errMsg, ex);
-                throw new EmployeeChallengeException(errMsg);
             }
+
+            throw ex;
         }
     }
 

@@ -3,6 +3,9 @@ package com.reliaquest.api.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reliaquest.api.dto.CreateEmployeeRequestDto;
 import com.reliaquest.api.dto.EmployeeEntity;
+import com.reliaquest.api.dto.EmployeeResponseDto;
+import com.reliaquest.api.exception.EmployeeChallengeException;
+import com.reliaquest.api.exception.GlobalExceptionHandler;
 import com.reliaquest.api.service.EmployeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,9 +13,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -34,7 +43,10 @@ class EmployeeControllerTest {
 
     @BeforeEach
     void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new EmployeeController(employeeService)).build();
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(new EmployeeController(employeeService))
+                .setControllerAdvice(new GlobalExceptionHandler(objectMapper))
+                .build();
     }
 
     @Test
@@ -133,6 +145,78 @@ class EmployeeControllerTest {
                 .andExpect(content().string("true"));
 
         verify(employeeService, times(1)).deleteEmployee(name);
+    }
+
+    @Test
+    public void shouldEmployeeChallengeExceptionException() throws Exception {
+        when(employeeService.deleteEmployee("Test")).thenThrow(new EmployeeChallengeException("Employee Not Found", HttpStatus.NOT_FOUND));
+
+        mockMvc.perform(delete("/api/v1/employee/Test"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Employee Not Found"))
+                .andReturn();
+    }
+
+    @Test
+    public void shouldHandleTooManyRequestsException() throws Exception {
+        HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatusCode.valueOf(429), "Too Many Requests", null, null, StandardCharsets.UTF_8);
+        when(employeeService.getAllEmployees()).thenThrow(httpClientErrorException);
+
+        mockMvc.perform(get("/api/v1/employee"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.message").value("Too many requests, Please try again later"))
+                .andReturn();
+    }
+
+    @Test
+    public void shouldHandleMethodArgumentTypeMismatchException() throws Exception {
+        mockMvc.perform(get("/api/v1/employee/xyz"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid UUID string: xyz"))
+                .andReturn();
+    }
+
+    @Test
+    public void shouldHandleClientErrorException() throws Exception {
+        EmployeeResponseDto<String> responseDto = new EmployeeResponseDto<>(null, "Bad Request", "Bad Request");
+        when(employeeService.getAllEmployees()).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Bad Request", objectMapper.writeValueAsBytes(responseDto), StandardCharsets.UTF_8));
+
+        mockMvc.perform(get("/api/v1/employee"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Bad Request"))
+                .andReturn();
+    }
+
+    @Test
+    public void shouldHandleServerErrorException() throws Exception {
+        String statusText = "Not Implemented";
+        EmployeeResponseDto<String> responseDto = new EmployeeResponseDto<>(null, statusText, statusText);
+        when(employeeService.getAllEmployees()).thenThrow(new HttpServerErrorException(HttpStatus.NOT_IMPLEMENTED, statusText, objectMapper.writeValueAsBytes(responseDto), StandardCharsets.UTF_8));
+
+        mockMvc.perform(get("/api/v1/employee"))
+                .andExpect(status().isNotImplemented())
+                .andExpect(jsonPath("$.message").value("Not Implemented"))
+                .andReturn();
+    }
+
+    @Test
+    public void shouldHandleResourceAccessException() throws Exception {
+        when(employeeService.getAllEmployees()).thenThrow(new ResourceAccessException("Network Error"));
+
+        mockMvc.perform(get("/api/v1/employee"))
+                .andExpect(status().isBadGateway())
+                .andExpect(jsonPath("$.message").value("Employee data service is unavailable"))
+                .andReturn();
+    }
+
+    @Test
+    public void shouldHandleUnhandledException() throws Exception {
+        when(employeeService.getAllEmployees()).thenThrow(new RuntimeException("Any Error"));
+
+        mockMvc.perform(get("/api/v1/employee"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("Any Error"))
+                .andReturn();
     }
 
 }

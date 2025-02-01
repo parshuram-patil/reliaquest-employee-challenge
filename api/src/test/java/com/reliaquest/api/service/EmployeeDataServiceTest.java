@@ -101,14 +101,12 @@ class EmployeeDataServiceTest {
     }
 
     @Test
-    void shouldHandleErrorOnGetEmployee() {
-        UUID empId = UUID.randomUUID();
-        EmployeeResponseDto<String> empNotFound = new EmployeeResponseDto<>(null, "Success", "Not Found");
+    void shouldHandleClientErrorOnGetEmployee() {
         when(restTemplate.exchange(anyString(), any(HttpMethod.class), eq(null), any(ParameterizedTypeReference.class)))
-                .thenThrow(new HttpClientErrorException(HttpStatus.NOT_ACCEPTABLE));
+                .thenThrow(new HttpClientErrorException(HttpStatus.NOT_ACCEPTABLE, "Not Acceptable"));
 
-        EmployeeChallengeException error = assertThrows(EmployeeChallengeException.class, () -> service.getEmployee(empId));
-        assertEquals("Error fetching employee with id " + empId, error.getMessage());
+        HttpClientErrorException error = assertThrows(HttpClientErrorException.class, () -> service.getEmployee(UUID.randomUUID()));
+        assertEquals("406 Not Acceptable", error.getMessage());
     }
 
     @Test

@@ -15,12 +15,6 @@ public class EmployeeChallengeException extends RuntimeException {
         this.errorCode = null;
     }
 
-    public EmployeeChallengeException(String message, HttpStatus status, Integer errorCode) {
-        this.message = message;
-        this.status = status;
-        this.errorCode = errorCode;
-    }
-
     public EmployeeChallengeException(String message, HttpStatus status) {
         this.message = message;
         this.status = status;
